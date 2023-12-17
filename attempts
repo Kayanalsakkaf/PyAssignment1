@@ -1,0 +1,81 @@
+
+def extract_abbreviations(obj): #was abandoned in favour of shorter and less complex code.
+    def find_pos(position):
+        if len(obj) == 1:
+            return 0, 0, common_score[obj[0]] 
+        for index in range(len(lengths)):
+            if lengths[index] > position:
+                break
+            position -= lengths[index]
+        if position == 0:
+            score = 0
+        elif position == lengths[index] - 1:
+            if obj[index][position] == 'E':
+                score = 20
+            else:
+                score = 6
+        else:
+            score = position + common_score[obj[index][position]]
+        return index, position, score
+    
+    common_score = {'A': 25, 'B': 8, 'C': 8, 'D': 9, 'E': 35, 'F': 7,
+                    'G': 9, 'H': 7, 'I': 25, 'J': 3, 'K': 6, 'L': 15,
+                    'M': 8, 'N': 15, 'O': 20, 'P': 8, 'Q': 1, 'R': 15,
+                    'S': 15, 'T': 15, 'U': 20, 'V': 7, 'W': 7, 'X': 3, 'Y': 7, 'Z': 1}
+    lengths = [len(word) for word in obj]
+    scores = common_score
+
+    first = obj[0][0]
+    last = obj[0][-1]
+    middle = obj[0][1:-1]
+    if len(middle) == 0:
+        min_score = float('inf')
+        min_letter = ''
+        for letter in obj[0]:
+            score = scores[letter]
+            if score < min_score:
+                min_score = score
+                min_letter = letter
+        return obj[0][0] + min_letter + obj[0][1]
+    else:
+        min_score = float('inf')
+        min_letter = ''
+        for letter in middle:
+            score = scores[letter]
+            if score < min_score:
+                min_score = score
+                min_letter = letter
+        return first + min_letter + last
+
+###
+
+def find_lowest_scores(abbrevb):
+    if len(abbrevb) == 0:
+        return []
+    val = min(abbrevb.values())
+    lowest_scores = [key for key in abbrevb if abbrevb[key] == val]
+    if len(lowest_scores) == 1:
+        return lowest_scores
+    else:
+        return [generate_abbreviation(word, i+1) for i, word in enumerate(lowest_scores)]
+
+def generate_abbreviation(word, index): #function was replaced
+  
+    pass
+
+###
+ 
+def main(file_name):
+    with open(file_name, 'r') as file:
+        lines = file.readlines()
+    objects = preprocess(lines)
+    abbrevs = [extract_abbreviations(obj) for obj in objects]
+    filtered = remove_duplicates(abbrevs)
+    out_path = 'alsakkaf_' + file_name[:-4] + '_abbrevs.txt'
+    with open(out_path, 'w') as file:
+        for line, abbrevb in zip(lines, filtered):
+            result = find_lowest_scores(abbrevb)
+            file.write(line)
+            file.write(' '.join(result) + '\n')
+if __name__ == '__main__':
+    main('trees.txt')
